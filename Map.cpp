@@ -1,6 +1,7 @@
 #include "Map.hpp"
 
-void Map::gener(){
+void Map::gener(int r){
+    map.resize(r);
     int count = 0;
     do
     {
@@ -33,3 +34,31 @@ std::vector<float> Map::getBordandFood(){
     return answ;
 }
 
+bool operator==(const Map &left , const Map &right){
+    if(left.map.size()!=right.map.size())
+        return false;
+    for (int i = 0; i < left.map.size(); i++)
+    {
+        if(left.map[i] != right.map[i])
+            return false;
+    }
+    
+    return true;
+}
+
+
+
+bool Map::Check() {
+
+    int  count = 0;
+
+    if (map[1] == -1) count++;
+    if (map[3] == -1) count++;
+    if (map[4] == -1) count++;
+    if (map[6] == -1) count++;
+    if (count == 4) {
+        return false;
+    }
+    return true;
+   
+}

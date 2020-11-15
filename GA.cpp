@@ -2,19 +2,15 @@
 #include <cmath>
 #include <omp.h>
 #include <cstdio>
-GA::GA(int pop, float cross_chance, float mutate_chance, int max_generation){
+
+
+
+GA::GA(std::vector<int> layerSize, int pop, float cross_chance, float mutate_chance, int max_generation){
     population.resize(pop);
 
     this->max_gen = max_generation;
-    srand(time(NULL));
-    std::vector<int> layerSize(7);
-    layerSize[0] = 16;
-    layerSize[1] = 32;
-    layerSize[2] = 64;
-    layerSize[3] = 64;
-    layerSize[4] = 32;
-    layerSize[5] = 16;
-    layerSize[6] = 4;
+    srand(clock());
+   
     value.resize(layerSize.size());
     for (int i = 0; i < layerSize.size(); i++)
     {
@@ -25,19 +21,21 @@ GA::GA(int pop, float cross_chance, float mutate_chance, int max_generation){
         population[i] = Chromosome(layerSize);
     }
     
-    std::clock_t start , finish;
-    map.resize(1000);
-    std::cout<<"Start generate map\n";
-    start = clock();
-    for (int i = 0; i < map.size(); i++)
-    {
-        map[i].gener();
-        if(checkMap(map[i], i)){
-            i--;
-        }
-    }
-    finish = clock();
-    std::cout<<"Finish generate map. Total time "<<((double) finish - start)/((double) CLOCKS_PER_SEC) <<"\n";
+    //std::clock_t start , finish;
+    // map.resize(240);
+    // std::cout<<"Start generate map\n";
+    // start = clock();
+    // unsigned int count =0;
+    // for (int i = 0; i < map.size(); i++)
+    // {
+    //     map[i].gener(8);
+    //     if(checkMap(map, i)){
+    //         i--;
+    //     }
+    //     std::cout<<count++<<"\t"<<i<<std::endl;
+    // }
+    // finish = clock();
+    //std::cout<<"Finish generate map. Total time "<<((double) finish - start)/((double) CLOCKS_PER_SEC) <<"\n";
     population[0].setChance_cross(cross_chance);
     population[0].setChanse_mutate(mutate_chance);
 }
@@ -56,20 +54,8 @@ void GA::Fitness(int index){
     int i = 0;
     do
     {
-        this->value[0] = map[i].getBordandFood();
-        for (int i = 0; i < value.size()-1; i++)
-        {
-
-            for (int j = 0; j < value[i+1].size(); j++)
-            {
-                float arg = this->population[index].w0[i][j];
-                for(int k= 0; k< value[i].size(); k++){
-                    arg+=this->population[index].weights[i][j][k]*value[i][k];
-                }
-                this->value[i+1][j] = act(arg);
-            }
-            
-        }
+        this->value[0] = FullMaps[i].getBordandFood();
+        this->ForwardFeed(index);
         population[index].step++;
         int max_index =0;
         float max = value[value.size()-1][0];
@@ -82,38 +68,46 @@ void GA::Fitness(int index){
         }
         
         if(max_index == 0){
-            if(map[i].map[1]== -1){
+            if(FullMaps[i].map[1]== -1){
                 this->population[index].step--;
-                //break;
+                #ifdef BREAK
+                    break;
+                #endif    
             }
-            if(map[i].map[1]== 1){
+            if(FullMaps[i].map[1]== 1){
                 this->population[index].point++;
             }
         }
         if(max_index == 1){
-            if(map[i].map[3]== -1){
+            if(FullMaps[i].map[3]== -1){
                this->population[index].step--;
-                //break;
+                #ifdef BREAK
+                    break;
+                #endif    
             }
-            if(map[i].map[3]== 1){
+            if(FullMaps[i].map[3]== 1){
                 this->population[index].point++;
             }
         }
         if(max_index == 2){
-            if(map[i].map[4]== -1){
+            if(FullMaps[i].map[4]== -1){
                 this->population[index].step--;
-                //break;
+                #ifdef BREAK
+                    break;
+                #endif    
             }
-            if(map[i].map[4]== 1){
+            if(FullMaps[i].map[4]== 1){
                 this->population[index].point++;
             }
         }
         if(max_index == 3){
-            if(map[i].map[6]== -1){
+            if(FullMaps[i].map[6]== -1){
                 this->population[index].step--;
-                //break;
+                #ifdef BREAK
+                    break;
+                #endif    
             }
-            if(map[i].map[6]== 1){
+            if(FullMaps[i].map[6]== 1){
                 this->population[index].point++;
             }
         }
@@ -121,7 +115,7 @@ void GA::Fitness(int index){
         
         
         i++;
-    } while (i<map.size());
+    } while (i<FullMaps.size());
     
 }
 
@@ -145,13 +139,17 @@ void GA::run(){
     std::cout << "Cross chanse";
     std::cout.width(15);
     std::cout << "Time (sec)";
+    std::cout.width(15);
+    std::cout << "Podruad";
+    
     std::cout << std::endl;
     clock_t start, end;
     int generation = 0;
+    int count =0 ;
     do
     {
         start = clock();
-       
+        
 //#pragma omp parallel for
         for (int iter =0 ; iter <  population.size(); iter++)
         {
@@ -204,10 +202,10 @@ void GA::run(){
             if (dMax == 0)
             {
                 if(Chromosome::chance_mutate < 0.8f)
-                    Chromosome::chance_mutate += 0.05f;
+                    Chromosome::chance_mutate += 0.005f;
                 if(dAVG<=0)
                     if (Chromosome::chance_cross < 0.6f) {
-                        Chromosome::chance_cross += 0.05f;
+                        Chromosome::chance_cross += 0.005f;
                     }
                 if (Chromosome::mutation_coef > 0.001f) {
                     Chromosome::mutation_coef -= 0.001f;
@@ -216,7 +214,7 @@ void GA::run(){
             else
             {
                 if (Chromosome::mutation_coef< 0.8f) {
-                    Chromosome::mutation_coef += 0.1f;
+                    Chromosome::mutation_coef += 0.001f;
                 }
             }
 
@@ -229,6 +227,13 @@ void GA::run(){
 
         }
         //softMaxStep();
+        if(generation >2){
+            if(max_step[max_step.size()-1]==max_step[max_step.size()-2]){
+                count++;
+            }else{
+                count =0;
+            }
+        }
         
         std::cout.width(15);
         std::cout << generation;
@@ -275,9 +280,14 @@ void GA::run(){
         end = clock();
         std::cout.width(15);
         std::cout << (end - start) / CLOCKS_PER_SEC;
+        std::cout.width(15);
+        std::cout << count;
         std::cout << std::endl;
-    } while (avgStep()<900);
-    
+        if(max_gen>generation && max_gen!=0){
+            break;
+        }
+    } while (avgStep()<FullMaps.size()*0.95&& !_kbhit());
+    std::cout<<"Trening complite!\n\n";
 
 }
 
@@ -285,10 +295,10 @@ float GA::act(float x){
     return 2.f/(1.f+expf(-x))-1.f;
 }
 
-bool GA::checkMap(Map& tmp,int index){
+bool GA::checkMap(std::vector<Map>& tmp,int index){
     for (int i = 0; i < index; i++)
     {
-        if(tmp.map == this->map[i].map)
+        if(tmp[i] == tmp[index])
             return  true;
     }
     return false;
@@ -346,6 +356,89 @@ void GA::SortPoint(){
     }
     
 
+}
+
+
+void GA::ForwardFeed(int index = 0){
+        for (int i = 0; i < value.size()-1; i++)
+        {
+
+            for (int j = 0; j < value[i+1].size(); j++)
+            {
+                float arg = this->population[index].w0[i][j];
+                for(int k= 0; k< value[i].size(); k++){
+                    arg+=this->population[index].weights[i][j][k]*value[i][k];
+                }
+                this->value[i+1][j] = act(arg);
+            }
+            
+        }
+}
+
+void GA::CreateFullMaps(){
+    int size = pow(3,8);
+    int count = 0;
+    this->FullMaps.resize(size);
+    for (int i = 0; i < FullMaps.size(); i++)
+    {
+        FullMaps[i].map.resize(8);
+    }
+    
+    
+    for (int i0 = -1; i0 < 2; i0++)
+    {
+        
+        for (int i1 = -1; i1 < 2; i1++)
+        {
+            
+            for (int i2 = -1; i2 < 2; i2++)
+            {
+                
+                for (int i3 = -1; i3 < 2; i3++)
+                {
+                    
+                    for (int i4 = -1; i4 < 2; i4++)
+                    {
+                        
+                        for (int i5 = -1; i5 < 2; i5++)
+                        {
+                            
+                            for (int i6 = -1; i6 < 2; i6++)
+                            {
+                                
+                                for (int i7 = -1; i7 < 2; i7++)
+                                {
+                                    this->FullMaps[count].map[0] = i0;
+                                    this->FullMaps[count].map[1] = i1;
+                                    this->FullMaps[count].map[2] = i2;
+                                    this->FullMaps[count].map[3] = i3;
+                                    this->FullMaps[count].map[4] = i4;
+                                    this->FullMaps[count].map[5] = i5;
+                                    this->FullMaps[count].map[6] = i6;
+                                    this->FullMaps[count].map[7] = i7;
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                }
+            } 
+        }    
+    }
+    
+    for (int i = 0; i < FullMaps.size(); i++)
+    {
+        if(!FullMaps[i].Check()){
+            FullMaps.erase(FullMaps.begin() + i);
+            i--;
+        }
+    }
+
+    
+   
+    std::cout<<count<<std::endl;
+    std::cout<<FullMaps.size()<<std::endl;
+    
 }
 
 
