@@ -17,7 +17,20 @@ void Map::gener(int r){
 }
 
 std::vector<float> Map::getBordandFood(){
-    std::vector<float> answ(16);
+    
+    std::vector<float> answ;
+    #ifndef TREATENT
+
+    answ.resize(8);
+    for (int i = 0; i < answ.size(); i++)
+    {
+        answ[i]=map[i];
+    }
+    
+
+    #endif
+    #ifdef TREATENT
+    answ.resize(16);
     for(int i = 0 ; i < 8; i++){
         if(map[i]==-1){
             answ[i] = 1;
@@ -30,7 +43,7 @@ std::vector<float> Map::getBordandFood(){
             answ[i+8] = 0;
         }
     }
-
+    #endif
     return answ;
 }
 

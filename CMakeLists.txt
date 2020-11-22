@@ -5,3 +5,7 @@ file(GLOB CPPS "*.cpp")
 file(GLOB HPPS "*.hpps")
 add_executable(TEST ${HPPS} ${CPPS})
 
+add_subdirectory(MathModel)
+target_link_libraries(TEST MathModel)
+
+install(TARGETS TEST DESTINATION bin)

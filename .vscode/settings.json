@@ -40,6 +40,8 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "ctime": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "cctype": "cpp",
+        "string": "cpp"
     }
 }

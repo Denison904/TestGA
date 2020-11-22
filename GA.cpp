@@ -2,10 +2,16 @@
 #include <cmath>
 #include <omp.h>
 #include <cstdio>
-
-
+#define ONE_NEURON
+#define TREATMENT
+#define POINT
+GA::GA(){
+   
+};
 
 GA::GA(std::vector<int> layerSize, int pop, float cross_chance, float mutate_chance, int max_generation){
+    this->accuracy = 0.9f;
+    
     population.resize(pop);
 
     this->max_gen = max_generation;
@@ -51,13 +57,19 @@ void GA::Mutation(int a){
 }
 
 void GA::Fitness(int index){
+    
+    
+    
+    
     int i = 0;
     do
     {
+        
         this->value[0] = FullMaps[i].getBordandFood();
+        
         this->ForwardFeed(index);
         population[index].step++;
-        int max_index =0;
+        int max_index = 0;
         float max = value[value.size()-1][0];
         for (int k = 1; k < value[value.size()-1].size(); k++)
         {
@@ -68,24 +80,24 @@ void GA::Fitness(int index){
         }
         
         if(max_index == 0){
-            if(FullMaps[i].map[1]== -1){
+            if(FullMaps[i].map[3]== -1){
                 this->population[index].step--;
                 #ifdef BREAK
                     break;
                 #endif    
             }
-            if(FullMaps[i].map[1]== 1){
+            if(FullMaps[i].map[3]== 1){
                 this->population[index].point++;
             }
         }
         if(max_index == 1){
-            if(FullMaps[i].map[3]== -1){
+            if(FullMaps[i].map[1]== -1){
                this->population[index].step--;
                 #ifdef BREAK
                     break;
                 #endif    
             }
-            if(FullMaps[i].map[3]== 1){
+            if(FullMaps[i].map[1]== 1){
                 this->population[index].point++;
             }
         }
@@ -129,8 +141,13 @@ void GA::run(){
     std::cout.width(15);
     std::cout << "MAX Step";
     std::cout.width(15); 
-    std::cout<< "AVG";
-    
+    std::cout<< "AVG Step";
+    #ifdef POINT
+    std::cout.width(15);
+    std::cout << "MAX Point";
+    std::cout.width(15); 
+    std::cout<< "AVG Point";
+    #endif
     std::cout.width(15);
     std::cout << "Mutate coef";
     std::cout.width(15);
@@ -144,8 +161,58 @@ void GA::run(){
     
     std::cout << std::endl;
     clock_t start, end;
+    clock_t total_start, total_end;
     int generation = 0;
     int count =0 ;
+    std::string filename;
+    time_t now = time(0);
+    tm *currentTime=gmtime(&now);
+    filename+= std::to_string(+currentTime->tm_year+1900);
+    filename+="_";
+    filename+= std::to_string(currentTime->tm_mon+1);
+    filename+="_";
+    filename+= std::to_string(currentTime->tm_mday);
+    filename+="_";
+    filename+=std::to_string(currentTime->tm_hour);
+    filename+="_";
+    filename+= std::to_string(currentTime->tm_min);
+    filename+=".csv";
+    char section = ';';
+    filename = "Statistica_" + filename;
+    std::ofstream statistic(filename);
+
+    if(statistic.is_open()){
+        statistic<<"Population"<<section<<this->population.size()<<"\n";
+        statistic<<"Max generation"<<section<<this->max_gen<<"\n";
+        statistic<<"Point"<<section;
+        #ifdef POINT
+        statistic<<"True\n";
+        #endif
+        #ifndef POINT
+        statistic<<"False\n";
+        #endif
+        statistic<<"Hidden layer"<<section<<value.size()-2<<"\n";
+        for (int i = 1; i < value.size()-1; i++)
+        {
+            statistic<<"Hidden layer #"<<i<<section<<value[i].size()<<"\n";
+        }
+        
+        statistic<< "Generation"<<section;
+        statistic<< "MAX Step"<<section;
+        statistic<< "AVG Step"<<section;
+        #ifdef POINT
+            statistic<<"MAX Point"<<section<<"AVG Point"<<section;
+        #endif
+        statistic<< "Mutate coef"<<section;
+        statistic<< "Mutate chanse"<<section;
+        statistic<< "Cross chanse"<<section;
+        statistic<< "Time (sec)"<<section;
+        statistic<< "Consecutiv"<<section;
+        statistic<<"\n";
+    }else{
+        std::cout<<"ERROR FILE IS NOT OPEN!\n";
+    }
+    total_start = clock();
     do
     {
         start = clock();
@@ -160,7 +227,9 @@ void GA::run(){
         
 
         this->SortStep();
-        //this->SortPoint();
+        #ifdef POINT
+        this->SortPoint();
+        #endif
         newpop.resize(population.size());
         int index_pop = 0;
         do{
@@ -192,13 +261,16 @@ void GA::run(){
 
 
         this->max_step.push_back(maxStep());
-        this->AVG.push_back(avgStep());
-
+        this->AVG_step.push_back(avgStep());
+        #ifdef POINT
+        this->max_point.push_back(population[0].point);
+        this->AVG_point.push_back(avgPoint());
+        #endif
         if (generation > 3) {
             float dMax = 0;
             float dAVG = 0;
             dMax = 1.f * max_step[max_step.size() - 1] - 2.f * max_step[max_step.size() - 2] + 1.f * max_step[max_step.size() - 3];
-            dAVG = 1.f * AVG[AVG.size() - 1] - 2.f * AVG[AVG.size() - 2] + 1.f * AVG[AVG.size() - 3];
+            dAVG = 1.f * AVG_step[AVG_step.size() - 1] - 2.f * AVG_step[AVG_step.size() - 2] + 1.f * AVG_step[AVG_step.size() - 3];
             if (dMax == 0)
             {
                 if(Chromosome::chance_mutate < 0.8f)
@@ -238,9 +310,15 @@ void GA::run(){
         std::cout.width(15);
         std::cout << generation;
         std::cout.width(15);
-        std::cout <<this->max_step[max_step.size()-1];
+        std::cout <<population[0].step;
         std::cout.width(15);
-        std::cout << AVG[AVG.size()-1];
+        std::cout << AVG_step[AVG_step.size()-1];
+        #ifdef POINT
+        std::cout.width(15);
+        std::cout << max_point[max_point.size()-1];
+        std::cout.width(15); 
+        std::cout<< AVG_point[AVG_point.size()-1];
+        #endif
         std::cout.width(15);
         std::cout << population[population.size()-1].mutation_coef;
         std::cout.width(15);
@@ -250,45 +328,46 @@ void GA::run(){
         
 
 
-        /*std::cout.width(15);
-        std::cout << "Num chrom";
-        std::cout.width(15);
-        std::cout << "Matation coef";
-        std::cout.width(15);
-        std::cout << "Mutate chance";
-        std::cout.width(15);
-        std::cout << "Cross Chance";
-        std::cout << std::endl;
-        for (int i = 0; i < population.size(); i++)
-        {
-            std::cout.width(15);
-            std::cout << i;
-            std::cout.width(15);
-            std::cout << population[i].mutation_coef;
-            std::cout.width(15);
-            std::cout << population[i].chance_mutate;
-            std::cout.width(15);
-            std::cout << population[i].chance_cross;
-            std::cout << std::endl;
-        }
-        std::cout << "_______________________________________________________________";
-        std::cout << std::endl;*/
+
         this->population = newpop;
-        //std::cout << "Popul = " << population.size()<<std::endl;
+
         newpop.clear();
-        generation++;
+
         end = clock();
         std::cout.width(15);
         std::cout << (end - start) / CLOCKS_PER_SEC;
         std::cout.width(15);
         std::cout << count;
         std::cout << std::endl;
-        if(max_gen>generation && max_gen!=0){
+
+
+        if(statistic.is_open()){
+            statistic<<generation<<section<<max_step[max_step.size()-1]<<section<<AVG_step[AVG_step.size()-1]<<section;
+            #ifdef POINT
+            statistic<<max_point[max_point.size()-1]<<section<<AVG_point[AVG_point.size()-1]<<section;
+            #endif
+            statistic<<Chromosome::mutation_coef<<section<<Chromosome::chance_mutate<<section<<Chromosome::chance_cross<<section<<(end - start) / CLOCKS_PER_SEC<<section<<count<<"\n";
+        }
+
+
+
+        generation++;
+        if(max_gen==generation && max_gen!=0){
+            std::cout<<"Achieve Max generation!\n";
             break;
         }
-    } while (avgStep()<FullMaps.size()*0.95&& !_kbhit());
-    std::cout<<"Trening complite!\n\n";
+     
+        if(AVG_step[AVG_step.size()-1]>FullMaps.size()*accuracy && accuracy!=0){
+            std::cout<<"Accuracy achieved!\n";
+            break;
+        }
 
+    } while (!_kbhit());
+    total_end = clock();
+    std::cout<<"Trening complite!\n\n";
+    statistic << "\nTotal time (Sec)"<<section << (total_end - total_start)/CLOCKS_PER_SEC;
+    statistic.close();
+    
 }
 
 float GA::act(float x){
@@ -325,6 +404,16 @@ float GA::avgStep(){
     return avg/float(this->population.size());
 }
 
+float GA::avgPoint(){
+    float avg = float(this->population[0].point);
+    for (int i = 1; i < this->population.size(); i++)
+    {
+        avg += float(this->population[i].point);
+    }
+    return avg/float(this->population.size());
+}
+
+
 void GA::SortStep(){
     Chromosome tmp;
     for (int i = 0; i < population.size(); i++)
@@ -343,21 +432,58 @@ void GA::SortStep(){
 
 void GA::SortPoint(){
     Chromosome tmp;
-    for (int i = 0; i < population.size()*0.1; i++)
+    int max = population[0].step;
+    for (int i = 1; population[i].step == max; i++)
     {
-        for (int j = 1; j < population.size()*0.1; j++)
+        for (int j = 1; population[j].step==max; j++)
         {
-            if(population[j-1].point<population[j].point){
-                tmp = population[j-1];
-                population[j-1] = population[j];
-                population[j] = population[j-1];
-            }
+            tmp = population[j-1];
+            population[j-1] = population[j];
+            population[j] = population[j-1];
         }
     }
     
 
+
 }
 
+void GA::setIntput(std::vector<float> input){
+    if(this->value[0].size()== input.size())
+        value[0] = input;
+    else
+    {
+        std::cout<<"Error input vector size!\n";
+        exit(1);
+    }
+
+}
+
+
+std::vector<float> GA::getOutput(){
+    std::vector<float> tmp(value[value.size()-1].size());
+    float max = value[value.size()-1][0];
+    for (int i = 1; i < value[value.size()-1].size(); i++)
+    {
+        if(value[value.size()-1][i]>max){
+            max = value[value.size()-1][i];
+        }
+    }
+    float soft=0;
+    for (int i = 0; i < value[value.size()-1].size(); i++)
+    {
+        soft+=expf(value[value.size()-1][i]-max);
+    }
+
+    for (int i = 0; i < value[value.size()-1].size(); i++)
+    {
+        tmp[i] = expf( value[value.size()-1][i]-max)/soft; 
+    }
+    
+
+
+    
+    return tmp;
+}
 
 void GA::ForwardFeed(int index = 0){
         for (int i = 0; i < value.size()-1; i++)
@@ -438,57 +564,69 @@ void GA::CreateFullMaps(){
    
     std::cout<<count<<std::endl;
     std::cout<<FullMaps.size()<<std::endl;
-    
+    std::cout<<FullMaps.size()*accuracy<<std::endl;
 }
 
 
 
-//void GA::softMaxStep() {
-//
-//   
-//    for (int index = 0; index < population.size(); index++)
-//    {
-//        float max = population[0].step;
-//
-//        for (int i = 1; i < population.size(); i++)
-//        {
-//            if (max < population[i].step) {
-//                max = population[i].step;
-//            }
-//        }
-//        float soft = 0;
-//        
-//        for (int i = 0; i < population.size(); i++)
-//        {
-//            soft += expf(population[i].step - max);
-//        }
-//        soft = expf(population[index].step - max) / soft;
-//        if (soft < 0.8f && soft>0.2f) {
-//            population[index].chance_cross = soft;
-//            population[index].chance_mutate = 1.f - soft;
-//        }
-//        else
-//        {
-//            if (soft <= 0.2f) {
-//                population[index].chance_cross = 0.2f;
-//                population[index].chance_mutate = 0.8f;
-//            }
-//            if(soft>=0.8f)
-//            {
-//                population[index].chance_cross = 0.8f;
-//                population[index].chance_mutate = 0.2f;
-//            }
-//        }
-//        
-//    
-//        std::cout.width(15);
-//        std::cout << index;
-//        std::cout.width(15);
-//        std::cout << soft;
-//        std::cout<<std::endl;
-//    }
-//
-//
-//    
-//
-//}
+void GA::SaveBestChrome(std::string filename){
+    time_t now = time(0);
+    
+    // char* dt = ctime(&now);
+    // filename+=dt;
+    tm *currentTime=gmtime(&now);
+    filename+="_";
+    filename+= std::to_string(+currentTime->tm_year+1900);
+    filename+="_";
+    filename+= std::to_string(currentTime->tm_mon+1);
+    filename+="_";
+    filename+= std::to_string(currentTime->tm_mday);
+    filename+="_";
+    filename+=std::to_string(currentTime->tm_hour);
+    filename+="_";
+    filename+= std::to_string(currentTime->tm_min); 
+    filename+=".txt";
+    std::ofstream file(filename);
+    if(file.is_open()){
+        file<<value.size()<<"\n";
+        for (int i = 0; i < value.size(); i++)
+        {
+            file<<value[i].size()<<" ";
+        }
+        for (int i = 0; i < population[0].weights.size(); i++)
+        {
+            for (int j = 0; j < population[0].weights[i].size(); j++)
+            {
+                for (int k = 0; k < population[0].weights[i][j].size(); k++)
+                {
+                    file<<population[0].weights[i][j][k]<<" ";
+                }
+                file <<"\n";
+            }
+            file<<"\n";
+        }
+        file<<"\n";
+        for (int i = 0; i < population[0].w0.size(); i++)
+        {
+            for (int j = 0; j < population[0].w0[i].size(); j++)
+            {
+                file<<population[0].w0[i][j]<<" ";
+            }
+            file<<"\n";
+        }
+        file.close();
+        
+        
+        
+    }else{
+        std::cout<<"File isn't open!\n";
+        return;
+    }
+
+
+}
+
+
+void GA::setAccuracy(float a){
+    this->accuracy = a;
+}

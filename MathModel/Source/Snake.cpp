@@ -1,9 +1,7 @@
-#include "../header/Snake.h"
+#include "../Header/Snake.hpp"
 
-Snake::Snake(int n, int x, int y){
-    body =4;
-    number = n;
-    for (int i = 0; i < body; i++)
+Snake::Snake(int x, int y){
+    for (int i = 0; i < 4; i++)
     {
         TailX.push_back(x+i);
         TailY.push_back(y);
@@ -11,22 +9,25 @@ Snake::Snake(int n, int x, int y){
     alive =true;
     hungry = 100;
     course = 0;
+    step = 0;
+    point =0 ;
 }
 
-void Snake::setTailX(int x){
+void Snake::setTail(int x, int y){
     TailX.push_back(x);
+    TailY.push_back(y);
 }
 
-void Snake::setTailY(int y){
-    TailY.push_back(y);
+void Snake::setStep(){
+    this->step++;
 }
 
 void Snake::setAlive(){
     alive = false;
 }
 
-void Snake::setBody(){
-    body++;
+void Snake::setPoint(){
+    this->point++;
 }
 
 void Snake::setHungry(){
@@ -47,13 +48,22 @@ void Snake::setCourse(int x){
 
 void Snake::setMove(int x, int y){
   //  int tmpX = TailX[0], tmpY = TailY[0];
-    for (int i = body-1; i >0; i--)
+    for (int i = TailX.size()-1; i >0; i--)
     {
         TailY[i]= TailY[i-1];
         TailX[i]= TailX[i-1];
     }
     TailX[0] +=x;
     TailY[0] +=y;
+}
+
+
+int Snake::getPoint(){
+    return this->point;
+}
+
+int Snake::getStep(){
+    return this->step;
 }
 
 int Snake::getTailX(int index){
@@ -65,16 +75,13 @@ int Snake::getTailY(int index){
 }
 
 int Snake::getBody(){
-    return body;
+    return this->TailX.size();
 }
 
 bool Snake::getAlive(){
     return alive; 
 }
 
-int Snake::getNumber(){
-    return number;
-}
 
 int Snake::getHungry(){
     return hungry;
@@ -83,3 +90,4 @@ int Snake::getHungry(){
 int Snake::getCourse(){
     return course;
 }
+

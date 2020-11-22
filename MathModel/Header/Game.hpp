@@ -1,8 +1,11 @@
 #pragma once
-#include "../header/Snake.h"
+#include "../Header/Snake.hpp"
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <cmath>
+#include <string>
+#include <vector>
 
 class Game{
 public:
@@ -10,26 +13,17 @@ public:
     Game(int n, int r, int high,int width);
     ~Game();
 
-    void Test(){
-        int x = 5, y = 5;
-        snake = new Snake[1];
-        snake[0] = Snake(0,5,5);
-        if(checkSnake(x ,y )){
-            std::cout<<"Y\n";
-        }else{
-            std::cout<<"N\n";
-        }
-    }
+
 
     void Logic();
     void Drow();
-    void Input(std::vector<std::vector<int>> x);
+    void Input(std::vector<std::vector<float>> x);
     void Input(std::vector<int> x);
 
     void newFood(int num);//NEED UPGRADE THIS FUNCTION
     void generateCurrentFood(int index);
 
-    std::vector<int> getScan(int num);
+    std::vector<float> getScan(int num);
 
     bool checkBorder(int x, int y);
     bool checkFood(int x, int y);
@@ -42,21 +36,18 @@ public:
     void SaveGame(std::vector<int*> rr, std::vector<int**> F, std::vector<std::vector<int>> scanData);
 
     int getNumAlive();
+    int getMaxStep();
 
-
+    void emptyMap();
 
 //  bool operator==(const std::vector<int>& left, const std::vector<int>& right);
     private:
-    Snake* snake;
+    std::vector<Snake> snake;
     int radius;
-    int *scan;
     int numofSnake;
     int high;
     int width;
-    int** border;
-    int numofBorder = 0;
-    int numofFood;
-    int** food;
-    int numofAlive = 1 ;
-    std::vector<int> step;
+    std::vector<std::vector<int>> border;
+    std::vector<std::vector<int>> food;
+    int numofAlive;
 };
