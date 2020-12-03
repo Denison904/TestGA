@@ -10,7 +10,7 @@ Chromosome::Chromosome(std::vector<int> layerSize){
             weights[i][j].resize(layerSize[i]);
             for (int k = 0; k < weights[i][j].size(); k++)
             {
-                weights[i][j][k] = (rand() % 5000) * 0.001f - 2.5f;
+                weights[i][j][k] = (rand() % 50000) * 0.0001f - 2.5f;
             }
         }
     }

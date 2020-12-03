@@ -10,6 +10,7 @@ GA::GA(){
 };
 
 GA::GA(std::vector<int> layerSize, int pop, float cross_chance, float mutate_chance, int max_generation){
+    this->layerSize= layerSize;
     this->accuracy = 0.9f;
     
     population.resize(pop);
@@ -176,6 +177,8 @@ void GA::run(){
     filename+=std::to_string(currentTime->tm_hour);
     filename+="_";
     filename+= std::to_string(currentTime->tm_min);
+    filename+="_";
+    filename+= std::to_string(currentTime->tm_sec);
     filename+=".csv";
     char section = ';';
     filename = "Statistica_" + filename;
@@ -217,7 +220,7 @@ void GA::run(){
     {
         start = clock();
         
-//#pragma omp parallel for
+#pragma omp parallel for
         for (int iter =0 ; iter <  population.size(); iter++)
         {
             
@@ -263,7 +266,8 @@ void GA::run(){
         this->max_step.push_back(maxStep());
         this->AVG_step.push_back(avgStep());
         #ifdef POINT
-        this->max_point.push_back(population[0].point);
+        
+        this->max_point.push_back(this->maxPoint());
         this->AVG_point.push_back(avgPoint());
         #endif
         if (generation > 3) {
@@ -357,7 +361,7 @@ void GA::run(){
             break;
         }
      
-        if(AVG_step[AVG_step.size()-1]>FullMaps.size()*accuracy && accuracy!=0){
+        if(max_step[max_step.size()-1]>FullMaps.size()*accuracy && accuracy!=0){
             std::cout<<"Accuracy achieved!\n";
             break;
         }
@@ -403,6 +407,19 @@ float GA::avgStep(){
     }
     return avg/float(this->population.size());
 }
+
+
+int GA::maxPoint(){
+    int max = 0 ;
+    for (int i = 0; i < this->population.size(); i++)
+    {
+        if(this->population[i].point>max ){
+            max = this->population[i].point;
+        }
+    }
+    return max;
+}
+
 
 float GA::avgPoint(){
     float avg = float(this->population[0].point);
@@ -629,4 +646,14 @@ void GA::SaveBestChrome(std::string filename){
 
 void GA::setAccuracy(float a){
     this->accuracy = a;
+}
+
+
+
+void GA::newPop(){
+    for (int i = 0; i < this->population.size(); i++)
+    {
+        this->population[i] = Chromosome(this->layerSize);
+    }
+    
 }

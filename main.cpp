@@ -1,3 +1,5 @@
+#define BREAK
+
 #include "GA.hpp"
 #include <string>
 #include <iostream>
@@ -34,13 +36,16 @@ int main(){
     std::cin>>maxgen;
     std::cout<<"\nEnter accuracy (Enter 0 if u want max gen): ";
     std::cin>>accuracy;
+
+    
     std::cout<<"Start GA:\n";
     GA test(layerSize, pop,cross,mut,maxgen);
     test.setAccuracy(accuracy);
     test.CreateFullMaps();
-    test.run();
 
+        test.run();
 
+    return 0 ;
     std::string filename = "BestChrom";
 
     

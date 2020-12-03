@@ -21,7 +21,7 @@ public:
     bool checkMap(std::vector<Map>& tmp, int  index);
     int maxStep();
     float avgStep();
-
+    
     int maxPoint();
     float avgPoint();
 
@@ -35,6 +35,8 @@ public:
     void SaveBestChrome(std::string filename);
     void setAccuracy(float a);
 
+
+    void newPop();
     
     //void softMaxStep();
     ~GA(){};
@@ -50,4 +52,5 @@ private:
     std::vector<Chromosome> newpop;
     std::vector<Map> map;
     std::vector<std::vector<float>> value;
+    std::vector<int> layerSize;
 };
