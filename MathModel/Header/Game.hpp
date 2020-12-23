@@ -40,6 +40,13 @@ public:
 
     void emptyMap();
 
+    void setNumofBorderRand(int num);
+    
+    enum Mode{
+        Stat,
+        Dinam
+    };
+    void setMode(Mode m);
 //  bool operator==(const std::vector<int>& left, const std::vector<int>& right);
     private:
     std::vector<Snake> snake;
@@ -50,4 +57,5 @@ public:
     std::vector<std::vector<int>> border;
     std::vector<std::vector<int>> food;
     int numofAlive;
+    Mode currentMode = Stat;
 };

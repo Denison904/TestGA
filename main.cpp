@@ -43,9 +43,9 @@ int main(){
     test.setAccuracy(accuracy);
     test.CreateFullMaps();
 
-        test.run();
+    test.run();
 
-    return 0 ;
+
     std::string filename = "BestChrom";
 
     
@@ -54,7 +54,10 @@ int main(){
     char next;
     getchar();
     Game game(1,1,20,20);
+
+    std::cout<<"Start DO\n";
     game.emptyMap();
+    
     do
     {
         game.Drow();
@@ -65,11 +68,28 @@ int main(){
         inp[0]= test.getOutput();
         game.Input(inp);
         game.Logic();
-
+        
     } while (game.getNumAlive()>0 && !_kbhit());
     std::cout<< game.getMaxStep();
     std::cout<<"Press any key\n";
-
+    getchar();
+    game = Game(1,1,20,20);
+    game.setMode(game.Mode::Stat);
+    game.setNumofBorderRand(10);
+    do
+    {
+        game.Drow();
+        test.setIntput(game.getScan(0));
+        test.ForwardFeed(0);
+        
+        std::vector<std::vector<float>> inp(1);
+        inp[0]= test.getOutput();
+        game.Input(inp);
+        game.Logic();
+        
+    } while (game.getNumAlive()>0 && !_kbhit());
+    std::cout<< game.getMaxStep();
+    std::cout<<"Press any key\n";
     getchar();
     return 0;
 }

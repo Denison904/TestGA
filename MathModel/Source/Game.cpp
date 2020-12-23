@@ -95,37 +95,7 @@ Game::Game(int n, int r, int high, int width){
 
     radius = r;
     
-    char a;
-       
-    
-    std::cout<<"Do u want add border?\n";
-    std::cin>>a;
-    if(a=='y'||a=='Y'){
-        int numofBorder;
-        std::cout<<"How much?";
-        std::cin>>numofBorder;
-        border.resize( numofBorder);
-        for (int i = 0; i < numofBorder; i++)
-        {
-            border[i].resize(2);
-            std::cout<<"Enter coord x: \n";
-            std::cin>>border[i][0];
-            std::cout<<"Enter coord y: \n";
-            std::cin>>border[i][1];
-            if (checkBorder(border[i][0], border[i][1])||checkSnake(border[i][0], border[i][1]))
-            {
-                std::cout<<"Error! This border can't be used!\n";
-                i--;
-            }
-        }
-        
-        std::cout<<"Complite!\n";
-    }
-    int numofFood;
-    if((width-2)*(high-2)>100)
-        numofFood = (width-2)*(high-2)/20;
-    else
-        numofFood =width*high/10;
+    int numofFood = 10;
     food.resize(numofFood);
     srand(time(NULL));
     for (int i = 0; i < numofFood; i++)
@@ -133,15 +103,11 @@ Game::Game(int n, int r, int high, int width){
         food[i].resize(2);
         food[i][0]=rand()%(width-2)+1;//0 - Ox
         food[i][1]=rand()%(high -2)+1;//1 - Oy
-        // if (checkFood(food[i][0],food[i][1]) &&checkBorder(food[i][0], food[i][1])&&checkSnake(food[i][0], food[i][1]))
-        // {
-        //    delete[] food[i]; 
-        //    i--;
-        //
-        // }
-        
+       
     }   
-    numofAlive = n;
+
+    this->numofAlive = n;
+ 
 }
 
 
@@ -203,10 +169,15 @@ void Game::Logic(){
 
                 for (int j = 0; j < food.size(); j++)
                 {
+
                     if (food[j][0] == snake[i].getTailX(0) && food[j][1] == snake[i].getTailY(0))
                     {
-                        generateCurrentFood(j);
-                        break;
+                        if(currentMode==Mode::Dinam){
+                           generateCurrentFood(j);
+                           break;
+                        }else{
+                            food.erase(food.begin()+j);
+                        }
                     }
                 }
                 
@@ -643,4 +614,38 @@ int Game::getNumAlive(){
 void Game::emptyMap(){
     food.clear();
     border.clear();
+}
+
+void Game::setNumofBorderRand(int num){
+    border.resize( num);
+    bool tmp = false;
+    for (int i = 0; i < num; i++)
+    {
+        tmp = false;
+        border[i].resize(2);
+        border[i][0] = rand()%(high-2)+1;
+        border[i][1] = rand()%(width-2)+1; 
+        for (int j = 0; j < i; j++)
+        {
+            if(border[i][0]==border[j][0] && border[i][1]==border[j][1])
+            {
+                tmp= true;
+                break;
+            }
+        }
+        if(tmp){
+            i--;
+            continue;
+        }
+        if (checkSnake(border[i][0], border[i][1]))
+        {
+            std::cout<<"Error! This border can't be used!\n";
+            i--;
+        }
+    }
+    
+}
+
+void Game::setMode(Mode m){
+    this->currentMode = m;
 }
