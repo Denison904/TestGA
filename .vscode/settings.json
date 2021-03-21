@@ -43,5 +43,6 @@
         "fstream": "cpp",
         "cctype": "cpp",
         "string": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false
 }

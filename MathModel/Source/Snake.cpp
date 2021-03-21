@@ -32,6 +32,9 @@ void Snake::setPoint(){
 
 void Snake::setHungry(){
     hungry--;
+    if(hungry<0){
+        alive = false;
+    }
 }
 
 void Snake::setHungry(int x){
@@ -91,3 +94,12 @@ int Snake::getCourse(){
     return course;
 }
 
+bool Snake::checkHeadTail() {
+    for (size_t i = 1; i < TailX.size(); i++)
+    {
+        if (TailX[0] == TailX[i] && TailY[0] == TailY[i]) {
+            return true;
+        }
+    }
+    return false;
+}

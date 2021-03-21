@@ -17,13 +17,14 @@ public:
 
     void Logic();
     void Drow();
-    void Input(std::vector<std::vector<float>> x);
+    void Input(std::vector<std::vector<double>> x);
     void Input(std::vector<int> x);
 
     void newFood(int num);//NEED UPGRADE THIS FUNCTION
     void generateCurrentFood(int index);
+    void setFood(std::vector<std::vector<int>> coord);
 
-    std::vector<float> getScan(int num);
+    std::vector<double> getScan(int num);
 
     bool checkBorder(int x, int y);
     bool checkFood(int x, int y);
@@ -39,7 +40,8 @@ public:
     int getMaxStep();
 
     void emptyMap();
-
+    int getPoint(int i);
+    int getStep(int i);
     void setNumofBorderRand(int num);
     
     enum Mode{
@@ -49,6 +51,7 @@ public:
     void setMode(Mode m);
 //  bool operator==(const std::vector<int>& left, const std::vector<int>& right);
     private:
+ 
     std::vector<Snake> snake;
     int radius;
     int numofSnake;

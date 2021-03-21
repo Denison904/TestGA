@@ -7,4 +7,6 @@ add_executable(TEST ${HPPS} ${CPPS})
 
 add_subdirectory(MathModel)
 target_link_libraries(TEST MathModel)
+add_subdirectory(RNN)
+target_link_libraries(TEST RNN)
 install(TARGETS TEST DESTINATION bin)

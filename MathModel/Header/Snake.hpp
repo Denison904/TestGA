@@ -26,6 +26,7 @@ class Snake{
     int getHungry();
     int getCourse();
     
+    bool checkHeadTail();
 
     private:
     std::vector<int> TailX;

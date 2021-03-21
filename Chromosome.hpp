@@ -3,8 +3,8 @@
 
 class Chromosome{
 public:
-    std::vector<std::vector<std::vector<float>>> weights;
-    std::vector<std::vector<float>> w0;
+    std::vector<std::vector<std::vector<double>>> weights;
+    std::vector<std::vector<double>> w0;
     int step;
     int point;
     Chromosome() {};
@@ -12,9 +12,9 @@ public:
     void Copy(Chromosome &newChrom,  Chromosome other);
     Chromosome Crossover(Chromosome& other);
     void Mutation();
-    static float chance_mutate ;
-    static float chance_cross ; 
-    static float mutation_coef ;
-    void setChanse_mutate(float x);
-    void setChance_cross(float x) ;
+    static double chance_mutate ;
+    static double chance_cross ; 
+    static double mutation_coef ;
+    void setChanse_mutate(double x);
+    void setChance_cross(double x) ;
 };

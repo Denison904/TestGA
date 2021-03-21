@@ -84,14 +84,16 @@ Game::Game(int n, int r, int high, int width){
     stepY=int((high-2)/(n+2));
 
     snake.resize(n);
-    for (int i = 0; i < n; i++)
-    {
-        snake[i]= Snake(width/(n+1)+stepX*i,high/(n+1)+i*stepY);
-    }
-    
     this->high=high;
     this->width=width;
     this->numofSnake=n;
+    for (int i = 0; i < n; i++)
+    {
+        snake[i]= Snake(width/(n+1)+stepX*i,high/(n+1)+i*stepY);
+        snake[i].setHungry(this->high*this->width*2);
+    }
+    
+
 
     radius = r;
     
@@ -140,7 +142,7 @@ void Game::Logic(){
             default:
                 break;
             }
-            if(checkBorder(snake[i].getTailX(0),snake[i].getTailY(0)) || checkEnemy(snake[i].getTailX(0),snake[i].getTailY(0),i))
+            if(checkBorder(snake[i].getTailX(0),snake[i].getTailY(0)) || checkEnemy(snake[i].getTailX(0),snake[i].getTailY(0),i) || this->snake[i].checkHeadTail())
             {
                  snake[i].setAlive();
                  numofAlive--;
@@ -185,9 +187,11 @@ void Game::Logic(){
                 if(eat){
                     snake[i].setTail(tmpX, tmpY);
                     
-                    snake[i].setFullHungry();
+                    snake[i].setHungry(this->high*this->width*2);
                 }
                 snake[i].setHungry();
+                if (!snake[i].getAlive())
+                    this->numofAlive--;
                 
             }
         }
@@ -240,7 +244,7 @@ void Game::Drow(){
             std::cout << '\n';
         }
 
-        std::vector<float> tmp;
+        std::vector<double> tmp;
         tmp = this->getScan(0);
         for (int i = 0; i < tmp.size(); i++)
         {
@@ -249,18 +253,22 @@ void Game::Drow(){
 
         for (int id = 0; id < snake.size(); id++)
         {
-            std::cout << "Step[" << id + 1 <<"]: " << snake[id].getStep() << std::endl;
+            std::cout << "Step[" << id  <<"]: " << snake[id].getStep() << std::endl;
+            std::cout << "Hangry[" << id << "] = " << snake[id].getHungry() << std::endl;
+            std::cout << "Alive[" << id << "] = " << snake[id].getAlive() << std::endl;
         }
-    }
+
+
+    }  
 }
 
 
-void Game::Input(std::vector<std::vector<float>> x){
+void Game::Input(std::vector<std::vector<double>> x){
     for (int i = 0; i < numofSnake; i++)
     {
         if(snake[i].getAlive()){
             int max_index = 0;
-            float max = x[i][0];
+            double max = x[i][0];
             for (int j = 0; j < x[i].size(); j++)
             {
                 if (x[i][j] > max){
@@ -302,11 +310,11 @@ void Game::generateCurrentFood(int index) {
     
 }
 
-std::vector<float> Game::getScan(int num){
+std::vector<double> Game::getScan(int num){
     int x = snake[num].getTailX(0);
     int y = snake[num].getTailY(0);
     int count =0 ;
-    std::vector<float> tmp;
+    std::vector<double> tmp;
     #ifndef TREATMENT
         tmp.resize((pow((radius)*2+1,2)-1));
         for (int i = -radius; i <= radius; i++)
@@ -648,4 +656,16 @@ void Game::setNumofBorderRand(int num){
 
 void Game::setMode(Mode m){
     this->currentMode = m;
+}
+
+void Game::setFood(std::vector<std::vector<int>> coord){
+    this->food = coord;
+}
+
+int Game::getPoint(int i){
+    return this->snake[i].getPoint();
+}
+
+int Game::getStep(int i ){
+    return this->snake[i].getStep();
 }

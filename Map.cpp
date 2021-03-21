@@ -16,9 +16,9 @@ void Map::gener(int r){
     } while (count<4);
 }
 
-std::vector<float> Map::getBordandFood(){
+std::vector<double> Map::getBordandFood(){
     
-    std::vector<float> answ;
+    std::vector<double> answ;
     #ifndef TREATENT
 
     answ.resize(8);

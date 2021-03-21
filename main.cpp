@@ -5,8 +5,30 @@
 #include <iostream>
 #include <ctime>
 #include "MathModel\Header\Game.hpp"
+#include "RNN\GA_RNN.hpp"
+
 
 int main(){ 
+    // RNN_simple rnn(4,2,2);
+    // std::vector<double> input(4);
+    // while(true){
+    //     for (size_t i = 0; i < 4; i++)
+    //     {
+    //         input[i] = (rand()%int(1e5))*1e-5;
+    //     }
+
+    //     rnn.setInput(input);
+    //     rnn.Forwardfeed();
+    //     std::cout<<rnn.getIndexClass()<<std::endl;
+        
+    // }
+
+ 
+    GA_RNN rnn_ga(2000, 8,4,2);
+    rnn_ga.start_learning();
+
+    return 0;
+
 
     int size;
     std::vector<int> layerSize;
@@ -21,9 +43,9 @@ int main(){
         std::cin>>layerSize[i];
     }
     layerSize[size-1] = 4;
-    float cross;
-    float mut ;
-    float accuracy;
+    double cross;
+    double mut ;
+    double accuracy;
     int maxgen ;
     int pop;
     std::cout<<"\nEnter population: ";
@@ -64,7 +86,7 @@ int main(){
         test.setIntput(game.getScan(0));
         test.ForwardFeed(0);
         
-        std::vector<std::vector<float>> inp(1);
+        std::vector<std::vector<double>> inp(1);
         inp[0]= test.getOutput();
         game.Input(inp);
         game.Logic();
@@ -82,7 +104,7 @@ int main(){
         test.setIntput(game.getScan(0));
         test.ForwardFeed(0);
         
-        std::vector<std::vector<float>> inp(1);
+        std::vector<std::vector<double>> inp(1);
         inp[0]= test.getOutput();
         game.Input(inp);
         game.Logic();

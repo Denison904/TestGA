@@ -8,6 +8,6 @@ public:
     Map(){};
     void gener(int r);
     bool Check();
-    std::vector<float> getBordandFood();
+    std::vector<double> getBordandFood();
     friend bool operator==(const Map &left , const Map &right);
 };

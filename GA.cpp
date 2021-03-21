@@ -9,7 +9,7 @@ GA::GA(){
    
 };
 
-GA::GA(std::vector<int> layerSize, int pop, float cross_chance, float mutate_chance, int max_generation){
+GA::GA(std::vector<int> layerSize, int pop, double cross_chance, double mutate_chance, int max_generation){
     this->layerSize= layerSize;
     this->accuracy = 0.9f;
     
@@ -58,10 +58,6 @@ void GA::Mutation(int a){
 }
 
 void GA::Fitness(int index){
-    
-    
-    
-    
     int i = 0;
     do
     {
@@ -71,7 +67,7 @@ void GA::Fitness(int index){
         this->ForwardFeed(index);
         population[index].step++;
         int max_index = 0;
-        float max = value[value.size()-1][0];
+        double max = value[value.size()-1][0];
         for (int k = 1; k < value[value.size()-1].size(); k++)
         {
             if(value[value.size()-1][k]>max){
@@ -271,8 +267,8 @@ void GA::run(){
         this->AVG_point.push_back(avgPoint());
         #endif
         if (generation > 3) {
-            float dMax = 0;
-            float dAVG = 0;
+            double dMax = 0;
+            double dAVG = 0;
             dMax = 1.f * max_step[max_step.size() - 1] - 2.f * max_step[max_step.size() - 2] + 1.f * max_step[max_step.size() - 3];
             dAVG = 1.f * AVG_step[AVG_step.size() - 1] - 2.f * AVG_step[AVG_step.size() - 2] + 1.f * AVG_step[AVG_step.size() - 3];
             if (dMax == 0)
@@ -374,7 +370,7 @@ void GA::run(){
     
 }
 
-float GA::act(float x){
+double GA::act(double x){
     return 2.f/(1.f+expf(-x))-1.f;
 }
 
@@ -399,13 +395,13 @@ int GA::maxStep(){
 }
 
 
-float GA::avgStep(){
-    float avg = float(this->population[0].step);
+double GA::avgStep(){
+    double avg = double(this->population[0].step);
     for (int i = 1; i < this->population.size(); i++)
     {
-        avg += float(this->population[i].step);
+        avg += double(this->population[i].step);
     }
-    return avg/float(this->population.size());
+    return avg/double(this->population.size());
 }
 
 
@@ -421,13 +417,13 @@ int GA::maxPoint(){
 }
 
 
-float GA::avgPoint(){
-    float avg = float(this->population[0].point);
+double GA::avgPoint(){
+    double avg = double(this->population[0].point);
     for (int i = 1; i < this->population.size(); i++)
     {
-        avg += float(this->population[i].point);
+        avg += double(this->population[i].point);
     }
-    return avg/float(this->population.size());
+    return avg/double(this->population.size());
 }
 
 
@@ -440,7 +436,7 @@ void GA::SortStep(){
             if(population[j-1].step<population[j].step){
                 tmp = population[j-1];
                 population[j-1] = population[j];
-                population[j] = population[j-1];
+                population[j] =tmp;
             }
         }
     }
@@ -450,13 +446,13 @@ void GA::SortStep(){
 void GA::SortPoint(){
     Chromosome tmp;
     int max = population[0].step;
-    for (int i = 1; population[i].step == max; i++)
+    for (int i = 1; population[i].step == max && i < population.size(); i++)
     {
-        for (int j = 1; population[j].step==max; j++)
+        for (int j = 1; population[j].step==max && j < population.size(); j++)
         {
             tmp = population[j-1];
             population[j-1] = population[j];
-            population[j] = population[j-1];
+            population[j] = tmp;
         }
     }
     
@@ -464,7 +460,7 @@ void GA::SortPoint(){
 
 }
 
-void GA::setIntput(std::vector<float> input){
+void GA::setIntput(std::vector<double> input){
     if(this->value[0].size()== input.size())
         value[0] = input;
     else
@@ -476,16 +472,16 @@ void GA::setIntput(std::vector<float> input){
 }
 
 
-std::vector<float> GA::getOutput(){
-    std::vector<float> tmp(value[value.size()-1].size());
-    float max = value[value.size()-1][0];
+std::vector<double> GA::getOutput(){
+    std::vector<double> tmp(value[value.size()-1].size());
+    double max = value[value.size()-1][0];
     for (int i = 1; i < value[value.size()-1].size(); i++)
     {
         if(value[value.size()-1][i]>max){
             max = value[value.size()-1][i];
         }
     }
-    float soft=0;
+    double soft=0;
     for (int i = 0; i < value[value.size()-1].size(); i++)
     {
         soft+=expf(value[value.size()-1][i]-max);
@@ -508,7 +504,7 @@ void GA::ForwardFeed(int index = 0){
 
             for (int j = 0; j < value[i+1].size(); j++)
             {
-                float arg = this->population[index].w0[i][j];
+                double arg = this->population[index].w0[i][j];
                 for(int k= 0; k< value[i].size(); k++){
                     arg+=this->population[index].weights[i][j][k]*value[i][k];
                 }
@@ -644,7 +640,7 @@ void GA::SaveBestChrome(std::string filename){
 }
 
 
-void GA::setAccuracy(float a){
+void GA::setAccuracy(double a){
     this->accuracy = a;
 }
 

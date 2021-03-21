@@ -30,9 +30,9 @@ Chromosome::Chromosome(std::vector<int> layerSize){
 }
 
 
-float Chromosome::chance_mutate = 0.5f;
-float Chromosome::chance_cross = 0.5f;
-float Chromosome::mutation_coef = 1.f;
+double Chromosome::chance_mutate = 0.5f;
+double Chromosome::chance_cross = 0.5f;
+double Chromosome::mutation_coef = 1.f;
 
 
 void Chromosome::Copy(Chromosome& newChrom, Chromosome other){
@@ -112,9 +112,9 @@ void Chromosome::Mutation(){
 
 
 
-void Chromosome::setChanse_mutate(float x){
+void Chromosome::setChanse_mutate(double x){
     this->chance_mutate = x;
 }
-void Chromosome::setChance_cross(float x){
+void Chromosome::setChance_cross(double x){
     this->chance_cross = x;
 }
