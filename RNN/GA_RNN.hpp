@@ -10,16 +10,16 @@
 #include <cmath>
 #include <omp.h>
 #include <cstdio>
-
+#include <random>
 
 class GA_RNN{
 public:
-    GA_RNN(int population, int input, int output, int numhidden);
+    GA_RNN(int population, int input, int output, std::vector<int> numhidden);
 
     void start_learning();
     void sort();
-    Chromosome_RNN Crossover(int a,int b);
-    void Mutation(int index);
+    
+
     void Fitness(int index);
     void Print();
     void writeStats();
@@ -27,6 +27,12 @@ public:
     int getMaxStep();
     void preprocessing_learning();
     void preprocessing_fitness(int index);
+    void sortStep();
+    void set_max_generation_preprocessing(int max);
+    void set_max_generation(int max);
+
+    RNN_simple get_rnn();
+    
 private:
     std::vector<Map> FullMaps;
     std::vector<Chromosome_RNN> chromos;
@@ -34,5 +40,8 @@ private:
     int generation=0;
     int numofdone = 0;
     std::fstream stats;
-    std::vector<std::vector<int>> coord;
+    std::vector<std::vector<int>> coord;    
+    int max_generation_preprocessing;
+    int max_generation;
+
 };

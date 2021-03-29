@@ -4,25 +4,26 @@
 
 RNN_simple::RNN_simple(){}
 
-RNN_simple::RNN_simple(int input_size, int output_size, int hidden_layer_size = 1){
+RNN_simple::RNN_simple(int input_size, int output_size, std::vector<int> hidden_layer_size ){
     // std::cout<<"Constructor RNN_simple Start\n";
-    int size_hidden_layer = input_size*2./3. + output_size+1;
+    
 
 
-    this->Input = Layer(input_size, size_hidden_layer);
+    this->Input = Layer(input_size, hidden_layer_size[0]);
     this->Output= Matrix(output_size, 1);
-    this->hiddenLayer.resize(hidden_layer_size);
+    this->hiddenLayer.resize(hidden_layer_size.size());
 
-    this->hiddenLayer[hidden_layer_size-1] = Layer(size_hidden_layer, output_size);
-    for(int i =0; i<hidden_layer_size-1; i++){
-        this->hiddenLayer[i] = Layer(size_hidden_layer,size_hidden_layer);
+    this->hiddenLayer[hidden_layer_size.size()-1] = Layer(hidden_layer_size[hidden_layer_size.size()-1], output_size);
+    for(int i =0; i<hidden_layer_size.size()-1; i++){
+        this->hiddenLayer[i] = Layer(hidden_layer_size[i], hidden_layer_size[i+1]);
     }
-    this->size = hidden_layer_size+1;
-    this->memory.resize(hidden_layer_size);
-    for (int i = 0; i < hidden_layer_size; i++)
+    this->size = hidden_layer_size.size()+1;
+    this->memory.resize(hidden_layer_size.size());
+    for (int i = 0; i < hidden_layer_size.size()-1; i++)
     {
-        this->memory[i] = Layer(size_hidden_layer,size_hidden_layer);
+        this->memory[i] = Layer(hidden_layer_size[i], hidden_layer_size[i + 1]);
     }
+    this->memory[hidden_layer_size.size() - 1] = Layer(hidden_layer_size[hidden_layer_size.size() - 1], output_size);
     // std::cout<<"Constructor RNN_simple Start\n";
 }
 
@@ -61,7 +62,7 @@ int RNN_simple::softmax(){
     
 }
 
-void RNN_simple::setInput(std::vector<double> input){
+void RNN_simple::setInput(std::vector<double>& input){
      
     this->Input.setInput(Matrix(input, 1));
 }

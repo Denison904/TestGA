@@ -9,7 +9,7 @@ Chromosome_RNN::Chromosome_RNN():RNN_simple(){
 
 }
 
-Chromosome_RNN::Chromosome_RNN(int input_size, int output_size, int hidden_layer_size):RNN_simple(input_size, output_size, hidden_layer_size){
+Chromosome_RNN::Chromosome_RNN(int input_size, int output_size, std::vector<int> hidden_layer_size):RNN_simple(input_size, output_size, hidden_layer_size){
     // std::cout<<"Constructor Chromosome_RNN Start\n";
     this->step = 0;
     this->point = 0;
