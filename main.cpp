@@ -8,20 +8,45 @@
 #include "RNN\GA_RNN.hpp"
 
 
-int main(){ 
-    // RNN_simple rnn(4,2,2);
-    // std::vector<double> input(4);
-    // while(true){
-    //     for (size_t i = 0; i < 4; i++)
-    //     {
-    //         input[i] = (rand()%int(1e5))*1e-5;
-    //     }
+#include<cstdio>
 
-    //     rnn.setInput(input);
-    //     rnn.Forwardfeed();
-    //     std::cout<<rnn.getIndexClass()<<std::endl;
-        
-    // }
+void Rand_Learning(){
+    int pop = 5000;
+    int  max, num_of_hidden;
+    std::cout<<"Enter pop,g max , num of hidden layer\n";
+    std::cin>>pop>>max>>num_of_hidden;
+    std::vector<int> hl(num_of_hidden);
+    for (size_t i = 0; i < num_of_hidden; i++)
+    {
+
+        std::cout<<"Enter hl["<<i<<"]: ";
+        std::cin>>hl[i];
+    }
+    GA_RNN rnn_ga(pop, 8, 4, hl);
+    rnn_ga.rand_learning(max);
+    RNN_simple rnn = rnn_ga.get_rnn();
+    std::cout<<"Press any kay\n";
+    char a; 
+    std::cin>>a;
+    Game game(1, 1, 15, 15);
+    do
+    {
+        game.Drow();
+        rnn.setInput(game.getScan(0));
+        rnn.Forwardfeed();
+        std::vector<int> tmp={rnn.getIndexClass()};
+        game.Input(tmp);
+
+        game.Logic();
+    } while (game.getNumAlive()>0);
+    std::cout<<"Step: "<<game.getStep(0)<<std::endl;
+    std::cout<<"Press any kay\n";
+   
+    std::cin>>a;
+
+}
+
+void Full_learning(){
     int pop = 5000;
     int max_pre, max, num_of_hidden;
     std::cout<<"Enter pop, max_pre, max , num of hidden layer\n";
@@ -33,16 +58,12 @@ int main(){
         std::cout<<"Enter hl["<<i<<"]: ";
         std::cin>>hl[i];
     }
-    std::cout<<"Do u need preprocessing?\n";
-    char preproc;
-    std::cin>>preproc;
 
     GA_RNN rnn_ga(pop, 8, 4, hl);
-    if(preproc=='y')
-    {
-        rnn_ga.set_max_generation_preprocessing(max_pre);
-        rnn_ga.preprocessing_learning();
-    }   
+
+    rnn_ga.set_max_generation_preprocessing(max_pre);
+    rnn_ga.preprocessing_learning();
+ 
     rnn_ga.set_max_generation(max);
 
     rnn_ga.start_learning();
@@ -65,8 +86,50 @@ int main(){
     std::cout<<"Press any kay\n";
    
     std::cin>>a;
-    return 0;
+    
+}
 
+int main(){ 
+    // RNN_simple rnn(4,2,2);
+    // std::vector<double> input(4);
+    // while(true){
+    //     for (size_t i = 0; i < 4; i++)
+    //     {
+    //         input[i] = (rand()%int(1e5))*1e-5;
+    //     }
+
+    //     rnn.setInput(input);
+    //     rnn.Forwardfeed();
+    //     std::cout<<rnn.getIndexClass()<<std::endl;
+        
+    // }
+    char c;
+    std::cin>>c;
+    if(c =='r'||c=='R')
+        Rand_Learning();
+    if(c=='F'||c=='f')
+        Full_learning();
+
+
+    Game game(1 , 20, 20);
+    do
+    {
+        game.Drow();
+        char a;
+        std::cin>>a;
+        
+        
+        std::vector<int> inp(1);
+        if (a=='a') inp[0] = 0;
+        if (a=='w') inp[0] = 1;
+        if (a=='d') inp[0] = 2;
+        if (a=='s') inp[0] = 3;
+        game.Input(inp);
+        game.Logic();
+    } while (game.getNumAlive()>0);
+    
+
+    return 0;
 
 
     //int size;

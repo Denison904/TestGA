@@ -42,7 +42,11 @@
         "ctime": "cpp",
         "fstream": "cpp",
         "cctype": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "algorithm": "cpp",
+        "random": "cpp",
+        "thread": "cpp",
+        "mutex": "cpp"
     },
     "cmake.configureOnOpen": false
 }

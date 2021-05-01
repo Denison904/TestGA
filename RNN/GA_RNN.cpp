@@ -62,6 +62,8 @@ void GA_RNN::start_learning(){
     Chromosome_RNN::mutation_coef = 1.0;
     int successively = 0;
     int tmp_max_step =0;
+    double dmut_coef = 0.1;
+    this->generation=0;
     do
     {
         
@@ -112,6 +114,7 @@ void GA_RNN::start_learning(){
                 break;
         }
 
+
         this->chromos = newChrom;
         newChrom.clear();
         end = clock();
@@ -138,10 +141,11 @@ void GA_RNN::start_learning(){
         }
         //this->Print();
         //this->writeStats();
-        if(this->generation>2){
-       
-            
-        }
+
+        if(Chromosome_RNN::mutation_coef < dmut_coef*2.0 && Chromosome_RNN::mutation_coef > 1e-7)
+            dmut_coef *=0.1;
+        if(Chromosome_RNN::mutation_coef > 1e-7);    
+            Chromosome_RNN::mutation_coef -=dmut_coef;
 
 
         if(this->generation>10 && Chromosome_RNN::mutation_coef>1e-6)
@@ -153,6 +157,10 @@ void GA_RNN::start_learning(){
     std::cout<<"\nTrening complite!\n\n";
     std::cout << "\nTotal time (Sec) "<< (total_end - total_start)/CLOCKS_PER_SEC;
 }
+
+
+
+
 
 void GA_RNN::sort(){
     int last_done =-1;
@@ -342,9 +350,9 @@ void GA_RNN::preprocessing_learning(){
     std::cout << std::endl;
     clock_t start, end;
     clock_t total_start, total_end;
-    int generation = 0;
     int count =0 ;
-    
+    double dmut_coef = 0.1;
+    this->generation = 0;
     total_start = clock();
     do
     {
@@ -456,8 +464,10 @@ void GA_RNN::preprocessing_learning(){
         std::cout << std::endl;
 
 
-        if(this->generation>10)
-            Chromosome_RNN::mutation_coef -=pow(1.5,(1-this->generation));
+        if(Chromosome_RNN::mutation_coef < dmut_coef*2.0 && Chromosome_RNN::mutation_coef > 1e-7)
+            dmut_coef *=0.1;
+        if(Chromosome_RNN::mutation_coef > 1e-7);    
+            Chromosome_RNN::mutation_coef -=dmut_coef;
 
         generation++;
 
@@ -563,4 +573,227 @@ RNN_simple GA_RNN::get_rnn() {
     chromos[0].ZeroNeurons();
     rnn = chromos[0];
     return rnn;
+}
+
+
+void GA_RNN::rand_learning(int max = 100){
+    Chromosome_RNN::mutation_coef = 1.0;
+    this->CreateFullMaps();
+    std::cout.width(15);
+    std::cout << "Generation";
+    std::cout.width(15);
+    std::cout << "MAX Step";
+    std::cout.width(15); 
+    std::cout<< "AVG Step";
+    #ifdef POINT
+    std::cout.width(15);
+    std::cout << "MAX Point";
+    std::cout.width(15); 
+    std::cout<< "AVG Point";
+    #endif
+    std::cout.width(15); 
+    std::cout<< "Coef_mut";
+    std::cout << std::endl;
+    clock_t start, end;
+    clock_t total_start, total_end;
+    int generation = 0;
+    int count =0 ;
+    
+            std::vector<int> rand(FullMaps.size());
+            for (int i = 0; i < rand.size(); i++)
+            {
+                rand[i] = i;
+            }
+    total_start = clock();
+    int gen_rand = 0;
+    double dmut_coef = 0.1;
+    do
+    {
+        start = clock();
+        double AVG_step = 0;
+        std::vector<int> rand_tmp = rand;
+        std::shuffle(rand_tmp.begin(), rand_tmp.end(), std::default_random_engine()); 
+#pragma omp parallel for
+        for (int iter =0 ; iter <  chromos.size(); iter++)
+        {
+            
+            this->random_fitness(iter,rand_tmp);
+            AVG_step += this->chromos[iter].step;
+            chromos[iter].ZeroNeurons();
+        }
+        sortStep();
+        AVG_step/=chromos.size();
+        Chromosome_RNN tmp;
+#pragma omp parallel for        
+        for (int i = 0; i < chromos.size(); i++)
+        {
+            for (int j = 1; j < chromos.size(); j++)
+            {
+                if(chromos[j-1].step<chromos[j].step){
+                    tmp = chromos[j-1];
+                    chromos[j-1] = chromos[j];
+                    chromos[j] = tmp;
+                }
+            }
+        }        
+#pragma omp parallel for
+        for (int i = 0; i < chromos.size(); i++)
+        {
+            for (int j = 1; j < chromos.size(); j++)
+            {
+                if(this->chromos[0].step ==this->chromos[j].step && this->chromos[0].step ==this->chromos[j-1].step)
+                    if(chromos[j-1].point<chromos[j].point){
+                        tmp = chromos[j-1];
+                        chromos[j-1] = chromos[j];
+                        chromos[j] = tmp;
+                    }
+            }
+        }    
+
+        
+
+        
+        std::vector<Chromosome_RNN>  newpop(chromos.size());
+        int index_pop = 0;
+#pragma omp parallel for
+        for (int i = 0; i < int(chromos.size() * 0.25) + 1; i++)
+        {
+            for (int j = 0; j < int(chromos.size() * 0.25) + 1; j++)
+            {
+                if (i == j) {
+                    newpop[index_pop] = chromos[i];
+                    newpop[index_pop].step = 0;
+                    newpop[index_pop].point = 0;
+                    index_pop++;
+                    continue;
+                }
+                newpop[index_pop] = chromos[i].Crossover(chromos[j]);
+                newpop[index_pop].Mutation();
+                newpop[index_pop].step = 0;
+                newpop[index_pop].point = 0;
+                index_pop++;
+                if (index_pop >= chromos.size())
+                    break;
+            }
+            if (index_pop >= chromos.size())
+                break;
+        }
+
+
+
+        
+       
+        #ifdef POINT
+        
+        this->max_point.push_back(this->maxPoint());
+        this->AVG_point.push_back(avgPoint());
+        #endif
+               //softMaxStep();
+  
+        
+        std::cout.width(15);
+        std::cout << gen_rand;
+        std::cout.width(15);
+        std::cout <<chromos[0].step;
+        std::cout.width(15);
+        std::cout << AVG_step;
+        #ifdef POINT
+        std::cout.width(15);
+        std::cout << max_point[max_point.size()-1];
+        std::cout.width(15); 
+        std::cout<< AVG_point[AVG_point.size()-1];
+        #endif
+        
+        
+
+
+
+        this->chromos = newpop;
+
+        newpop.clear();
+
+        end = clock();
+        std::cout.width(15);
+        std::cout <<Chromosome_RNN::mutation_coef;
+        std::cout.width(15);
+        std::cout << (end - start) / CLOCKS_PER_SEC;
+
+        std::cout << std::endl;
+
+        if(Chromosome_RNN::mutation_coef < dmut_coef*2.0 && Chromosome_RNN::mutation_coef > 1e-7)
+            dmut_coef *=0.1;
+        if(Chromosome_RNN::mutation_coef > 1e-7);    
+            Chromosome_RNN::mutation_coef -=dmut_coef;
+
+        gen_rand++;
+
+        
+        
+
+    } while (gen_rand<=max);
+
+}
+
+
+void GA_RNN::random_fitness(int index,std::vector<int> rand_index){
+      // std::cout<<"Index "<<index<<std::endl;
+    for (size_t i = 0; i < rand_index.size(); i++)
+    {
+        // std::cout<<"i "<<i<<std::endl;
+        
+        this->chromos[index].setInput(FullMaps[i].getBordandFood());
+        
+        this->chromos[index].Forwardfeed();
+        this->chromos[index].step++;
+        int max_index = chromos[index].getIndexClass();
+        
+        if(max_index == 0){
+            if(FullMaps[i].map[3]== -1){
+                this->chromos[index].step--;
+                #ifdef BREAK
+                    break;
+                #endif    
+            }
+            if(FullMaps[i].map[3]== 1){
+                this->chromos[index].point++;
+            }
+        }
+        if(max_index == 1){
+            if(FullMaps[i].map[1]== -1){
+               this->chromos[index].step--;
+                #ifdef BREAK
+                    break;
+                #endif    
+            }
+            if(FullMaps[i].map[1]== 1){
+                this->chromos[index].point++;
+            }
+        }
+        if(max_index == 2){
+            if(FullMaps[i].map[4]== -1){
+                this->chromos[index].step--;
+                #ifdef BREAK
+                    break;
+                #endif    
+            }
+            if(FullMaps[i].map[4]== 1){
+                this->chromos[index].point++;
+            }
+        }
+        if(max_index == 3){
+            if(FullMaps[i].map[6]== -1){
+                this->chromos[index].step--;
+                #ifdef BREAK
+                    break;
+                #endif    
+            }
+            if(FullMaps[i].map[6]== 1){
+                this->chromos[index].point++;
+            }
+        }
+
+        
+        
+    } 
+    
 }

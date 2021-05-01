@@ -11,6 +11,7 @@
 #include <omp.h>
 #include <cstdio>
 #include <random>
+#include <algorithm>
 
 class GA_RNN{
 public:
@@ -31,8 +32,13 @@ public:
     void set_max_generation_preprocessing(int max);
     void set_max_generation(int max);
 
+    
+
     RNN_simple get_rnn();
     
+    void rand_learning(int max);
+    std::vector<int> randomhueta();
+    void random_fitness(int index, std::vector<int> rand_index);
 private:
     std::vector<Map> FullMaps;
     std::vector<Chromosome_RNN> chromos;
